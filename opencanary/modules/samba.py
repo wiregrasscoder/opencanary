@@ -20,11 +20,29 @@ if sys.platform.startswith("linux"):
             #samba 3 re
             #audit_re = re.compile(r'.*smbd\[[0-9]+\]: (.*)')
             for line in lines:
-                    matches = audit_re.match(line)
+                #templog = {}
+                #templog['line'] = line
+                #self.logger.log(templog)
+
+                if len(matches.group(1).split('|')) == 14 :
+                     (user,remoteIP,localIP,remoteName,shareName,
+                     localName,smbVer,smbArch,timeStamp,domainName,
+                     auditAction,auditStatus,auditAction2,fileName) = matches.group(1).split('|')
+                     data = {}
+                     data['src_host'] = remoteIP
+                     data['src_port'] = '-1'
+                     data['dst_host'] = localIP
+                     data['dst_port'] = 445
+                     data['logtype'] =  self.logger.LOG_SMB_FILE_OPEN
+                     data['logdata'] = {'USER':user, 'REMOTENAME': remoteName, 'SHARENAME': shareName,
+                                       'LOCALNAME': localName, 'SMBVER': smbVer, 'SMBARCH': smbArch,
+                                       'DOMAIN': domainName, 'AUDITACTION': auditAction,
+                                       'STATUS':auditStatus, 'AUDITACTION2': auditAction2, 'FILENAME': fileName}                    
+
+                else:
                     (user,remoteIP,localIP,remoteName,shareName,
                     localName,smbVer,smbArch,timeStamp,domainName,
                     auditAction,auditStatus,fileName) = matches.group(1).split('|')
-
                     data = {}
                     data['src_host'] = remoteIP
                     data['src_port'] = '-1'
@@ -32,10 +50,10 @@ if sys.platform.startswith("linux"):
                     data['dst_port'] = 445
                     data['logtype'] =  self.logger.LOG_SMB_FILE_OPEN
                     data['logdata'] = {'USER':user, 'REMOTENAME': remoteName, 'SHARENAME': shareName,
-                                       'LOCALNAME': localName, 'SMBVER': smbVer, 'SMBARCH': smbArch,
-                                       'DOMAIN': domainName, 'AUDITACTION': auditAction,
-                                       'STATUS':auditStatus, 'FILENAME': fileName}
-                    self.logger.log(data)
+                                      'LOCALNAME': localName, 'SMBVER': smbVer, 'SMBARCH': smbArch,
+                                      'DOMAIN': domainName, 'AUDITACTION': auditAction,
+                                      'STATUS':auditStatus, 'FILENAME': fileName}
+                self.logger.log(data)
 
     class CanarySamba(CanaryService):
         NAME = 'smb'
