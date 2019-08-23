@@ -23,7 +23,8 @@ if sys.platform.startswith("linux"):
                 #templog = {}
                 #templog['line'] = line
                 #self.logger.log(templog)
-
+                matches = audit_re.match(line)
+                
                 if len(matches.group(1).split('|')) == 14 :
                      (user,remoteIP,localIP,remoteName,shareName,
                      localName,smbVer,smbArch,timeStamp,domainName,
